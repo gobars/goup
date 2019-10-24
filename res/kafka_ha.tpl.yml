@@ -1,0 +1,12 @@
+---
+- hosts: kafka
+  remote_user: root
+  vars:
+    - kafka_zk_quorum: {{ .kafka_zk_quorum }}
+    - zookeeper_hosts:{{range $index, $element := .zookeeper_hosts}}
+        - {'host': {{$element}}, 'id': 1{{$index}}, 'port': 2181, 'leader_port': '2888:3888'}{{end}}
+
+  roles:
+    - { role: java }
+    - { role: zookeeper }
+    - { role: kafka}

@@ -1,0 +1,40 @@
+[[servers]]
+ip = "192.168.33.110"
+iface = "eth0"
+username = "root"
+password = "vagrant"
+
+[[servers]]
+ip = "192.168.33.111"
+iface = "eth0"
+username = "root"
+password = "vagrant"
+
+[[servers]]
+ip = "192.168.33.111"
+iface = "eth0"
+username = "root"
+password = "vagrant"
+
+[mysql-ha]
+Master1Addr      = "192.168.33.110"   # Master1的网络地址
+Master2Addr      = "192.168.33.111"   # Master2的网络地址
+Password         = "1qazzaq1"         # Root用户密码
+User 			 = "root"             # 默认用户
+Port             = 3306               # MySQL 端口号
+ReplUsr          = "repl"             # 复制用用户名
+ReplPassword     = "repl-BE30FD30"    # 复制用户密码
+VipAddr          = ""                 # 负载均衡IP地址
+IfaceName        = "eth0"             # 网卡名称
+
+[redis-ha]
+MasterAddr       = "192.168.33.110"   # Master的网络地址
+SlaveAddr        = "192.168.33.111"   # Slave的网络地址
+Port             = 3306               # Redis 端口号
+Password         = "123456"           # Redis的密码
+VipAddr          = ""                 # 负载均衡IP地址
+IfaceName        = "eth0"             # 网卡名称
+
+[kafka-ha]
+Brokers          = ["192.168.33.110","192.168.33.111","192.168.33.112"]
+Port             = 9092               # Kafka 端口号

@@ -1,0 +1,49 @@
+---
+- hosts: redis1
+  vars:
+    - redis_master_host: "{{ .MasterAddr }}"
+    - redis_master_port: "{{ .Port }}"
+    - redis_requirepass: '{{ .Password }}'
+  roles:
+    - { role: redis, redis_port: {{.Port}} }
+
+- hosts: redis2
+  vars:
+    - redis_master_host: "{{ .MasterAddr }}"
+    - redis_master_port: "{{ .Port }}"
+    - redis_requirepass: '{{ .Password }}'
+  roles:
+    - { role: redis, redis_port: {{.Port}}, redis_slave: true }
+
+## 双机安装keepalived
+- hosts: redis1, redis2
+  vars:
+  roles:
+    - keepalived
+
+## 双机安装keepalived-redis
+- hosts: redis1
+  vars:
+    - keepalived_role: "MASTER"
+    - keepalived_vip: "{{ .VipAddr }}"
+    - network_interface: "{{ .IfaceName }}"
+    - redis_master_ip: '{{ .MasterAddr }}'
+    - redis_master_port: {{.Port}}
+    - redis_slave_ip: '{{ .SlaveAddr }}'
+    - redis_slave_port: {{.Port}}
+    - redis_requirepass: '{{ .Password }}'
+  roles:
+    - keepalived-redis
+
+- hosts: redis2
+  vars:
+    - keepalived_role: "BACKUP"
+    - keepalived_vip: "{{ .VipAddr }}"
+    - network_interface: "{{ .IfaceName }}"
+    - redis_master_ip: '{{ .MasterAddr }}'
+    - redis_master_port: {{.Port}}
+    - redis_slave_ip: '{{ .SlaveAddr }}'
+    - redis_slave_port: {{.Port}}
+    - redis_requirepass: '{{ .Password }}'
+  roles:
+    - keepalived-redis

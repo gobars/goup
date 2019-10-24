@@ -1,0 +1,14 @@
+---
+- hosts: kafka
+  remote_user: root
+  vars:
+    - kafka_zk_quorum: 192.168.33.110:2181,192.168.33.111:2181,192.168.33.112:2181/kafka
+    - zookeeper_hosts:
+        - {'host': 192.168.33.110, 'id': 10, 'port': 2181, 'leader_port': '2888:3888'}
+        - {'host': 192.168.33.111, 'id': 11, 'port': 2181, 'leader_port': '2888:3888'}
+        - {'host': 192.168.33.112, 'id': 12, 'port': 2181, 'leader_port': '2888:3888'}
+
+  roles:
+    - { role: java }
+    - { role: zookeeper }
+    - { role: kafka}

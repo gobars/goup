@@ -1,0 +1,59 @@
+---
+## 双机安装mysql
+- hosts: mysql1,mysql2
+  roles:
+    - role: 'mysql'
+      mysql57_port: '{{.Port}}'
+      mysql57_replication_role: 'master'
+      mysql57_replication_user: {name: '{{.ReplUsr}}', password: '{{.ReplPassword}}'}
+
+## 配置第一台机器成为slave 192.168.33.110 --> 192.168.33.111
+- hosts: mysql1
+  roles:
+    - role: 'mysql'
+      mysql57_port: '{{.Port}}'
+      mysql57_auto_increment_offset: '1'
+      mysql57_auto_increment_increment: '2'
+      mysql57_replication_role: 'slave' # 指定为slave角色
+      mysql57_replication_master: '{{.Master2Addr}}'
+      mysql57_replication_master_port: '{{.Port}}'
+      mysql57_replication_user: {name: '{{.ReplUsr}}', password: '{{.ReplPassword}}'}
+
+## 配置第二台机器成为slave 192.168.33.111 --> 192.168.33.110
+- hosts: mysql2
+  roles:
+    - role: 'mysql'
+      mysql57_port: '{{.Port}}'
+      mysql57_auto_increment_offset: '2'
+      mysql57_auto_increment_increment: '2'
+      mysql57_replication_role: 'slave'
+      mysql57_replication_master: '{{.Master1Addr}}'
+      mysql57_replication_master_port: '{{.Port}}'
+      mysql57_replication_user: {name: '{{.ReplUsr}}', password: '{{.ReplPassword}}'}
+
+## 双机安装keepalived
+- hosts: mysql1, mysql2
+  remote_user: root
+  vars:
+  roles:
+    - keepalived
+
+## 配置第一台机器keepalive-mysql，成为vip主节点，注意network_interface为vip所在网卡的网卡名称，默认一般是eth0或者eth1
+- hosts: mysql1
+  remote_user: root
+  vars:
+    - keepalived_role: "MASTER"
+    - keepalived_vip: "{{.VipAddr}}"
+    - network_interface: "{{.IfaceName}}"
+  roles:
+    - keepalived-mysql
+
+## 配置第二台机器keepalive-mysql，成为vip备节点，注意network_interface为vip所在网卡的网卡名称，默认一般是eth0或者eth1
+- hosts: mysql2
+  remote_user: root
+  vars:
+    - keepalived_role: "BACKUP"
+    - keepalived_vip: "{{.VipAddr}}"
+    - network_interface: "{{.IfaceName}}"
+  roles:
+    - keepalived-mysql
